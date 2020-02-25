@@ -93,8 +93,8 @@ elif platform.system() == "Darwin":
     plat = "osx"
     compiler = "xcode"
 elif platform.system() == "Windows":
-    plat = "windows"
-    compiler = "msvc"
+    plat = "win"
+    compiler = "visualstudio"
 else:
     raise NotImplementedError(platform.system())
 
