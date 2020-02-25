@@ -61,3 +61,7 @@ src/afdko_tx/_version.py
 
 # Visual Studio Code
 .vscode
+
+# binary executable
+src/afdko_tx/tx
+src/afdko_tx/tx.exe
