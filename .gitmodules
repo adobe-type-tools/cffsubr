@@ -1,0 +1,3 @@
+[submodule "afdko"]
+	path = third_party/afdko
+	url = https://github.com/adobe-type-tools/afdko
