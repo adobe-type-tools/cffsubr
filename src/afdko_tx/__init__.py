@@ -11,6 +11,8 @@ except ImportError:
 
 __all__ = ["process", "Error"]
 
+_SUPPORTED_OUTPUT_FORMATS = ("cff", "cff2")
+
 
 try:
     from ._version import version as __version__
@@ -32,10 +34,13 @@ def run(*args, **kwargs):
         return subprocess.run([tx_cli] + list(args), **kwargs)
 
 
-def subroutinize(fontdata: bytes) -> bytes:
-    """Run subroutinizer on the input fontdata and return the new CFF2 FontSet."""
+def subroutinize(fontdata: bytes, output_format="CFF2") -> bytes:
+    """Run subroutinizer on the input font data and return processed output."""
     if not isinstance(fontdata, bytes):
         raise TypeError(f"expected bytes, found {type(fontdata).__name__}")
+    output = output.lower()
+    if output_format not in _SUPPORTED_OUTPUT_FORMATS:
+        raise ValueError(f"Unsupported output format: '{output_format}'")
     # We can't read from stdin because of this issue:
     # https://github.com/adobe-type-tools/afdko/issues/937
     with tempfile.NamedTemporaryFile(prefix="tx-", delete=False) as tmp:
@@ -43,7 +48,7 @@ def subroutinize(fontdata: bytes) -> bytes:
     try:
         # write to stdout and capture output
         result = run(
-            "-cff2", "+S", "+b", tmp.name, capture_output=True, check=True
+            f"-{output_format}", "+S", "+b", tmp.name, capture_output=True, check=True
         )
     except subprocess.CalledProcessError as e:
         raise Error(e.stderr.decode())
