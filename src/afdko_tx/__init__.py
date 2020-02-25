@@ -1,8 +1,6 @@
 import subprocess
 import os
-import io
 import tempfile
-from typing import Union
 
 try:
     from importlib.resources import path
@@ -37,7 +35,7 @@ def run(*args, **kwargs):
 def subroutinize(fontdata: bytes) -> bytes:
     """Run subroutinizer on the input fontdata and return the new CFF2 FontSet."""
     if not isinstance(fontdata, bytes):
-        raise TypeError(f"expected bytes, found {type(fontadata).__name__}")
+        raise TypeError(f"expected bytes, found {type(fontdata).__name__}")
     # We can't read from stdin because of this issue:
     # https://github.com/adobe-type-tools/afdko/issues/937
     with tempfile.NamedTemporaryFile(prefix="tx-", delete=False) as tmp:
