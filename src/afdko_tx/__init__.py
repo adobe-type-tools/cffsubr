@@ -10,7 +10,7 @@ except ImportError:
     from importlib_resources import path
 
 
-__all__ = ["process", "Error"]
+__all__ = ["subroutinize", "OutputFormat", "Error"]
 
 
 class OutputFormat(enum.Enum):
