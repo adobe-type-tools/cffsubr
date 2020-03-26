@@ -9,6 +9,20 @@ import os
 import subprocess
 
 
+cmdclass = {}
+try:
+    from wheel.bdist_wheel import bdist_wheel
+except ImportError:
+    print("warning: wheel package is not installed", file=sys.stderr)
+else:
+    class UniversalBdistWheel(bdist_wheel):
+
+        def get_tag(self):
+            return ("py3", "none",) + bdist_wheel.get_tag(self)[2:]
+
+    cmdclass["bdist_wheel"] = UniversalBdistWheel
+
+
 class Executable(Extension):
 
     if os.name == "nt":
@@ -81,6 +95,8 @@ class ExecutableBuildExt(build_ext):
         copy_file(exe_fullpath, dest_path, verbose=self.verbose, dry_run=self.dry_run)
 
 
+cmdclass["build_ext"] = ExecutableBuildExt
+
 c_programs_dir = os.path.join(
     "third_party",
     "afdko",
@@ -129,7 +145,7 @@ setup(
     packages=find_packages("src"),
     ext_modules=[tx],
     zip_safe=False,
-    cmdclass={"build_ext": ExecutableBuildExt},
+    cmdclass=cmdclass,
     install_requires=["importlib_resources; python_version < '3.7'"],
     setup_requires=["setuptools_scm"],
     extras_require={"testing": ["pytest"]},
