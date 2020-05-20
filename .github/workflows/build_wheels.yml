@@ -1,0 +1,41 @@
+# based on https://github.com/joerick/cibuildwheel/blob/master/examples/github-minimal.yml
+
+name: Build wheels
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-python@v1
+      name: Install Python
+      with:
+        python-version: '3.7'
+
+    - name: Install cibuildwheel
+      run: |
+        python -m pip install cibuildwheel==1.4.1
+
+    - name: Build wheel
+      run: |
+        python -m cibuildwheel --output-dir wheelhouse
+      env:
+        # skip 2.7, 3.4 and 3.5: for now, only build for >= 3.6 64-bit
+        CIBW_SKIP="cp27-* cp33-* cp34-* cp35-* cp*manylinux1_i686"
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: wheels
+        path: ./wheelhouse
