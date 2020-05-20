@@ -147,7 +147,11 @@ setup(
     zip_safe=False,
     cmdclass=cmdclass,
     install_requires=["importlib_resources; python_version < '3.7'"],
-    setup_requires=["setuptools_scm"],
+    setup_requires=[
+        "setuptools_scm",
+        # finds all git tracked files including submodules when making sdist MANIFEST
+        "setuptools-git-ls-files",
+    ],
     extras_require={"testing": ["pytest"]},
     python_requires=">=3.6",
     classifiers=[
