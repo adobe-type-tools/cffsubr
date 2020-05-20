@@ -15,10 +15,10 @@ try:
 except ImportError:
     print("warning: wheel package is not installed", file=sys.stderr)
 else:
-    class UniversalBdistWheel(bdist_wheel):
 
+    class UniversalBdistWheel(bdist_wheel):
         def get_tag(self):
-            return ("py3", "none",) + bdist_wheel.get_tag(self)[2:]
+            return ("py3", "none") + bdist_wheel.get_tag(self)[2:]
 
     cmdclass["bdist_wheel"] = UniversalBdistWheel
 
@@ -97,11 +97,7 @@ class ExecutableBuildExt(build_ext):
 
 cmdclass["build_ext"] = ExecutableBuildExt
 
-c_programs_dir = os.path.join(
-    "third_party",
-    "afdko",
-    "c",
-)
+c_programs_dir = os.path.join("third_party", "afdko", "c")
 if platform.system() == "Linux":
     plat = "linux"
     compiler = "gcc"
@@ -114,16 +110,12 @@ elif platform.system() == "Windows":
 else:
     raise NotImplementedError(platform.system())
 
+build_release_cmd = ("build.cmd" if plat == "win" else "sh build.sh") + " release"
+
 tx = Executable(
     "cffsubr.tx",
-    build_cmd="sh build.sh release",
-    cwd=os.path.join(
-        c_programs_dir,
-        "tx",
-        "build",
-        plat,
-        compiler,
-    ),
+    build_cmd=build_release_cmd,
+    cwd=os.path.join(c_programs_dir, "tx", "build", plat, compiler),
     output_dir=os.path.join(c_programs_dir, "build_all"),
 )
 
