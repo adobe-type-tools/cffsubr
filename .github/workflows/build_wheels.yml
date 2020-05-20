@@ -49,15 +49,15 @@ jobs:
         # skip PyPy (no manylinux1), 32-bit linux, and other architectures
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
 
-    - uses: actions/upload-artifact@v1
-      with:
-        name: wheels
-        path: ./dist
-
     - name: Build sdist
       run: |
         python setup.py sdist
-      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      if: matrix.os == 'ubuntu-latest'
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: cffsubr-dist
+        path: ./dist
 
     - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@master
