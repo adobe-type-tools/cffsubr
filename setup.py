@@ -63,10 +63,10 @@ class ExecutableBuildExt(build_ext):
 
     def call_vcvarsall_bat(self):
         import struct
-        from distutils._msvccompiler import _get_vc_env
+        from setuptools.msvc import msvc14_get_vc_env
 
         arch = "x64" if struct.calcsize("P") * 8 == 64 else "x86"
-        vc_env = _get_vc_env(arch)
+        vc_env = msvc14_get_vc_env(arch)
         self._compiler_env.update(vc_env)
 
     def build_extension(self, ext):
