@@ -43,6 +43,8 @@ jobs:
       run: |
         python -m cibuildwheel --output-dir dist
       env:
+        # make sure afdko submodule is not "dirty" before starting a new build
+        CIBW_BEFORE_BUILD: "git submodule foreach git clean -fdx"
         # The embedded 'tx' C executable is independent of Python ABI so we only need to build it once.
         # Here we choose the minimum supported version, i.e. Python 3.6
         CIBW_BUILD: "cp36-*"
