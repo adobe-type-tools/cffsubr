@@ -18,6 +18,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # unshallow fetch for setuptools-scm
+        submodules: true
 
     - uses: actions/setup-python@v1
       name: Install Python
