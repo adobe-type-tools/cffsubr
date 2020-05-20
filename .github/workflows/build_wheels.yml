@@ -42,8 +42,9 @@ jobs:
       run: |
         python -m cibuildwheel --output-dir dist
       env:
-        # skip 2.7, 3.4 and 3.5: for now, only build for >= 3.6 64-bit
-        CIBW_BUILD: "cp36-* cp37-* cp38-*"
+        # The embedded 'tx' C executable is independent of Python ABI so we only need to build it once.
+        # Here we choose the minimum supported version, i.e. Python 3.6
+        CIBW_BUILD: "cp36-*"
         # build using the manylinux1 image to ensure manylinux1 wheels are produced
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         # skip PyPy (no manylinux1), 32-bit linux, and other architectures
