@@ -36,7 +36,11 @@ jobs:
         python -m cibuildwheel --output-dir wheelhouse
       env:
         # skip 2.7, 3.4 and 3.5: for now, only build for >= 3.6 64-bit
-        CIBW_SKIP: "cp27-* cp33-* cp34-* cp35-* cp*manylinux1_i686"
+        CIBW_BUILD: "cp36-* cp37-* cp38-*"
+        # build using the manylinux1 image to ensure manylinux1 wheels are produced
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+        # skip PyPy (no manylinux1), 32-bit linux, and other architectures
+        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
 
     - uses: actions/upload-artifact@v1
       with:
