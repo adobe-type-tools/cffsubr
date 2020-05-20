@@ -62,8 +62,10 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
 
     - name: Publish package to PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_password }}
+      run: |
+        pip install twine
+        twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.pypi_password }}
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
