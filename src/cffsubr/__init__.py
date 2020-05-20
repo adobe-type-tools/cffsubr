@@ -28,8 +28,9 @@ class Error(Exception):
     pass
 
 
-def run(*args, **kwargs):
+def _run_embedded_tx(*args, **kwargs):
     """Run the embedded tx executable with the list of positional arguments.
+
     Return a subprocess.CompletedProcess object with the following attributes:
     args, returncode, stdout, stderr.
     All keyword arguments are forwarded to subprocess.run function.
@@ -49,7 +50,7 @@ def subroutinize(fontdata: bytes, output_format=OutputFormat.CFF2) -> bytes:
         tmp.write(fontdata)
     try:
         # write to stdout and capture output
-        result = run(
+        result = _run_embedded_tx(
             f"-{output_format.value}",
             "+S",
             "+b",

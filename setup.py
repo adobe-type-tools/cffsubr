@@ -115,7 +115,7 @@ else:
     raise NotImplementedError(platform.system())
 
 tx = Executable(
-    "afdko_tx.tx",
+    "cffsubr.tx",
     build_cmd="sh build.sh release",
     cwd=os.path.join(
         c_programs_dir,
@@ -131,15 +131,15 @@ with open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
 
 setup(
-    name="afdko_tx",
-    use_scm_version={"write_to": "src/afdko_tx/_version.py"},
-    description=("Python wrapper for the afdko/tx tool"),
+    name="cffsubr",
+    use_scm_version={"write_to": "src/cffsubr/_version.py"},
+    description=("Standalone CFF subroutinizer based on the AFDKO tx tool"),
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Cosimo Lupo",
     author_email="cosimo@anthrotype.com",
-    url="https://github.com/anthrotype/afdko-tx-python",
-    license="OpenSource, BSD-style",
+    url="https://github.com/adobe-type-tools/cffsubr",
+    license="Apache 2.0",
     platforms=["posix", "nt"],
     package_dir={"": "src"},
     packages=find_packages("src"),
