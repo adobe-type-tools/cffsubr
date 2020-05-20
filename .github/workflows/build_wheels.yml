@@ -37,7 +37,7 @@ jobs:
 
     - name: Build wheel
       run: |
-        python -m cibuildwheel --output-dir wheelhouse
+        python -m cibuildwheel --output-dir dist
       env:
         # skip 2.7, 3.4 and 3.5: for now, only build for >= 3.6 64-bit
         CIBW_BUILD: "cp36-* cp37-* cp38-*"
@@ -49,4 +49,16 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: wheels
-        path: ./wheelhouse
+        path: ./dist
+
+    - name: Build sdist
+      run: |
+        python setup.py sdist
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
