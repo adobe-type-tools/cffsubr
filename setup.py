@@ -13,7 +13,7 @@ cmdclass = {}
 try:
     from wheel.bdist_wheel import bdist_wheel
 except ImportError:
-    print("warning: wheel package is not installed", file=sys.stderr)
+    pass
 else:
 
     class UniversalBdistWheel(bdist_wheel):
