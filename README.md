@@ -1,3 +1,3 @@
-# afdko-tx-python
+# cffsubr
 
-Standalone python wrapper for the [afdko/tx](https://github.com/adobe-type-tools/afdko) tool.
+Standalone CFF subroutinizer based on the [AFDKO](https://github.com/adobe-type-tools/afdko) tx tool.
