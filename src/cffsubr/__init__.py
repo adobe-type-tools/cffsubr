@@ -55,7 +55,7 @@ def _run_embedded_tx(*args, **kwargs):
         args, returncode, stdout, stderr.
     """
     with path(__name__, "tx") as tx_cli:
-        return subprocess.run([tx_cli] + list(args), **kwargs)
+        return subprocess.run([str(tx_cli)] + list(args), **kwargs)
 
 
 def _tx_subroutinize(data: bytes, output_format: str = CFFTableTag.CFF) -> bytes:
@@ -87,7 +87,7 @@ def _tx_subroutinize(data: bytes, output_format: str = CFFTableTag.CFF) -> bytes
             f"-{output_format.rstrip().lower()}",
             "+S",
             "+b",
-            tmp.name,
+            str(tmp.name),
             # capture_output=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
