@@ -82,12 +82,15 @@ def _tx_subroutinize(data: bytes, output_format: str = CFFTableTag.CFF) -> bytes
         tmp.write(data)
     try:
         # write to stdout and capture output
+        # TODO: use 'capture_output' parameter once we go >= 3.7 only
         result = _run_embedded_tx(
             f"-{output_format.rstrip().lower()}",
             "+S",
             "+b",
             tmp.name,
-            capture_output=True,
+            # capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             check=True,
         )
     except subprocess.CalledProcessError as e:
