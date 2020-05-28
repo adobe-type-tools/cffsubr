@@ -55,7 +55,7 @@ jobs:
         CIBW_TEST_REQUIRES: "pytest"
         # run test suite with pytest, no coverage
         # TODO: run with coverage and publish to codecov.io
-        CIBW_TEST_COMMAND: "pytest"
+        CIBW_TEST_COMMAND: "cd {project} && pytest"
 
     - uses: actions/upload-artifact@v1
       with:
