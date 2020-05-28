@@ -52,6 +52,10 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         # skip PyPy (no manylinux1), 32-bit linux, and other architectures
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
+        CIBW_TEST_REQUIRES: "tox"
+        # run test suite with current tox python, no coverage
+        # TODO: run with coverage and publish to codecov.io
+        CIBW_TEST_COMMAND: "tox -e py"
 
     - uses: actions/upload-artifact@v1
       with:
