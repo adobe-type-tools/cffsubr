@@ -16,7 +16,7 @@ except ImportError:
 from fontTools import ttLib
 
 
-__all__ = ["subroutinize", "Error"]
+__all__ = ["subroutinize", "desubroutinize", "has_subroutines", "Error"]
 
 
 try:
@@ -117,8 +117,8 @@ def _tx_subroutinize(data: bytes, output_format: str = CFFTableTag.CFF) -> bytes
     return output_data
 
 
-def _sniff_cff_table_format(otf: ttLib.TTFont) -> Optional[CFFTableTag]:
-    return next(
+def _sniff_cff_table_format(otf: ttLib.TTFont) -> CFFTableTag:
+    cff_tag = next(
         (
             CFFTableTag(tag)
             for tag in otf.keys()
@@ -126,6 +126,9 @@ def _sniff_cff_table_format(otf: ttLib.TTFont) -> Optional[CFFTableTag]:
         ),
         None,
     )
+    if not cff_tag:
+        raise Error("Invalid OTF: no 'CFF ' or 'CFF2' tables found")
+    return cff_tag
 
 
 def subroutinize(
@@ -158,8 +161,6 @@ def subroutinize(
         or if subroutinization process fails.
     """
     input_format = _sniff_cff_table_format(otf)
-    if not input_format:
-        raise Error("Invalid OTF: no 'CFF ' or 'CFF2' tables found")
 
     if cff_version is None:
         output_format = input_format
@@ -195,5 +196,51 @@ def subroutinize(
             post_table.extraNames = []
             post_table.mapping = {}
             post_table.glyphOrder = glyphOrder
+
+    return otf
+
+
+def has_subroutines(otf: ttLib.TTFont) -> bool:
+    """Return True if the font's CFF or CFF2 table contains any subroutines."""
+    table_tag = _sniff_cff_table_format(otf)
+    top_dict = otf[table_tag].cff.topDictIndex[0]
+    all_subrs = [top_dict.GlobalSubrs]
+    if hasattr(top_dict, "FDArray"):
+        all_subrs.extend(
+            fd.Private.Subrs for fd in top_dict.FDArray if hasattr(fd.Private, "Subrs")
+        )
+    elif hasattr(top_dict.Private, "Subrs"):
+        all_subrs.append(top_dict.Private.Subrs)
+    return any(all_subrs)
+
+
+def desubroutinize(otf: ttLib.TTFont, inplace=True) -> ttLib.TTFont:
+    """Remove all subroutines from the font.
+
+    Args:
+        otf (ttLib.TTFont): the input font object.
+        inplace (bool): whether to create a copy or modify the input font. By default
+            the input font is modified.
+
+    Returns:
+        The modified font containing the desubroutinized CFF or CFF2 table.
+        This will be a different TTFont object if inplace=False.
+
+    Raises:
+        cffsubr.Error if the font doesn't contain 'CFF ' or 'CFF2' table,
+        or if desubroutinization process fails.
+    """
+    # the 'desubroutinize' method is dynamically added to the CFF table class
+    # as a side-effect of importing the fontTools.subset.cff module...
+    from fontTools.subset import cff as _
+
+    if not inplace:
+        otf = copy.deepcopy(otf)
+
+    table_tag = _sniff_cff_table_format(otf)
+    try:
+        otf[table_tag].desubroutinize()
+    except Exception as e:
+        raise Error("Desubroutinization failed") from e
 
     return otf

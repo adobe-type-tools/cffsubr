@@ -99,3 +99,46 @@ class TestSubroutinize:
         font2 = ttLib.TTFont(buf)
 
         assert font2.getGlyphOrder() != glyph_order
+
+
+@pytest.mark.parametrize(
+    "testfile, table_tag",
+    [
+        ("SourceSansPro-Regular.subset.ttx", "CFF "),
+        ("SourceSansVariable-Roman.subset.ttx", "CFF2"),
+    ],
+)
+def test_sniff_cff_table_format(testfile, table_tag):
+    font = load_test_font(testfile)
+
+    assert cffsubr._sniff_cff_table_format(font) == table_tag
+
+
+def test_sniff_cff_table_format_invalid():
+    with pytest.raises(cffsubr.Error, match="Invalid OTF"):
+        cffsubr._sniff_cff_table_format(ttLib.TTFont())
+
+
+@pytest.mark.parametrize(
+    "testfile",
+    ["SourceSansPro-Regular.subset.ttx", "SourceSansVariable-Roman.subset.ttx"],
+)
+def test_has_subroutines(testfile):
+    font = load_test_font(testfile)
+
+    assert not cffsubr.has_subroutines(font)
+    assert cffsubr.has_subroutines(cffsubr.subroutinize(font))
+
+
+@pytest.mark.parametrize(
+    "testfile",
+    ["SourceSansPro-Regular.subset.ttx", "SourceSansVariable-Roman.subset.ttx"],
+)
+def test_desubroutinize(testfile):
+    font = load_test_font(testfile)
+    cffsubr.subroutinize(font)
+
+    font2 = cffsubr.desubroutinize(font, inplace=False)
+
+    assert cffsubr.has_subroutines(font)
+    assert not cffsubr.has_subroutines(font2)
