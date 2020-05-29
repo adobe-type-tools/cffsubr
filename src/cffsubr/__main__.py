@@ -39,6 +39,12 @@ def main(args=None):
         action="store_false",
         help="whether to drop postscript glyph names when converting from CFF to CFF2.",
     )
+    parser.add_argument(
+        "-d",
+        "--desubroutinize",
+        action="store_true",
+        help="Don't subroutinize, instead remove all subroutines (in any).",
+    )
     options = parser.parse_args(args)
 
     if options.inplace:
@@ -47,7 +53,10 @@ def main(args=None):
         options.output_file = sys.stdout.buffer
 
     with ttLib.TTFont(options.input_file, lazy=True) as font:
-        cffsubr.subroutinize(font, options.cff_version, options.keep_glyph_names)
+        if options.desubroutinize:
+            cffsubr.desubroutinize(font)
+        else:
+            cffsubr.subroutinize(font, options.cff_version, options.keep_glyph_names)
         font.save(options.output_file)
 
 
