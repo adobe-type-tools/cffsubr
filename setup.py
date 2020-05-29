@@ -97,7 +97,7 @@ class ExecutableBuildExt(build_ext):
 
 cmdclass["build_ext"] = ExecutableBuildExt
 
-c_programs_dir = os.path.join("third_party", "afdko", "c")
+c_programs_dir = os.path.join("external", "afdko", "c")
 if platform.system() == "Linux":
     plat = "linux"
     compiler = "gcc"
