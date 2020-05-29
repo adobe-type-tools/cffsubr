@@ -5,6 +5,7 @@ import subprocess
 import os
 import tempfile
 from typing import BinaryIO, Optional, Union
+import sys
 
 try:
     from importlib.resources import path
@@ -78,26 +79,42 @@ def _tx_subroutinize(data: bytes, output_format: str = CFFTableTag.CFF) -> bytes
     output_format = CFFTableTag(output_format.rjust(4))
     # We can't read from stdin because of this issue:
     # https://github.com/adobe-type-tools/afdko/issues/937
-    with tempfile.NamedTemporaryFile(prefix="tx-", delete=False) as tmp:
-        tmp.write(data)
+    with tempfile.NamedTemporaryFile(prefix="tx-", delete=False) as input_tmp:
+        input_tmp.write(data)
+
+    args = [f"-{output_format.rstrip().lower()}", "+S", "+b"]
+    kwargs = dict(check=True, stderr=subprocess.PIPE)
+
+    if sys.platform == "win32":
+        # On Windows, we also can't write to stdout and capture output, because tx
+        # doesn't seem to correctly handle binary data in stdout.
+        # https://github.com/adobe-type-tools/cffsubr/pull/4#issuecomment-635624491
+        with tempfile.NamedTemporaryFile(prefix="tx-", delete=False) as output_tmp:
+            output_tmp.write(data)
+        args.extend(["-o", output_tmp.name])
+    else:
+        # On Unix we write to stdout and capture output
+        kwargs["stdout"] = subprocess.PIPE
+        output_tmp = None
+
+    args.append(input_tmp.name)
+
     try:
-        # write to stdout and capture output
-        # TODO: use 'capture_output' parameter once we go >= 3.7 only
-        result = _run_embedded_tx(
-            f"-{output_format.rstrip().lower()}",
-            "+S",
-            "+b",
-            str(tmp.name),
-            # capture_output=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=True,
-        )
+        result = _run_embedded_tx(*args, **kwargs)
     except subprocess.CalledProcessError as e:
         raise Error(e.stderr.decode())
+    else:
+        if output_tmp is not None:
+            with open(output_tmp.name, "rb") as fp:
+                output_data = fp.read()
+        else:
+            output_data = result.stdout
     finally:
-        os.remove(tmp.name)
-    return result.stdout
+        os.remove(input_tmp.name)
+        if output_tmp is not None:
+            os.remove(output_tmp.name)
+
+    return output_data
 
 
 def _sniff_cff_table_format(otf: ttLib.TTFont) -> Optional[CFFTableTag]:
