@@ -167,9 +167,7 @@ def subroutinize(
     else:
         output_format = CFFTableTag.from_version(cff_version)
 
-    if has_subroutines(otf):
-        otf = desubroutinize(otf, inplace=inplace)
-    elif not inplace:
+    if not inplace:
         otf = copy.deepcopy(otf)
 
     glyphOrder = otf.getGlyphOrder()
