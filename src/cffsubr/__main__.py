@@ -52,7 +52,11 @@ def main(args=None):
     elif not options.output_file:
         options.output_file = sys.stdout.buffer
 
-    with ttLib.TTFont(options.input_file, lazy=True) as font:
+    # Load TTFont lazily by default assuming output != input; load non-lazily if -i
+    # option is passed, so that fontTools let us overwrite the input file.
+    lazy = True if not options.inplace else None
+
+    with ttLib.TTFont(options.input_file, lazy=lazy) as font:
         if options.desubroutinize:
             cffsubr.desubroutinize(font)
         else:
