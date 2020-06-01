@@ -17,6 +17,13 @@ def load_test_font(name):
     return ttLib.TTFont(buf)
 
 
+def recompile_font(otf):
+    buf = io.BytesIO()
+    otf.save(buf)
+    buf.seek(0)
+    return ttLib.TTFont(buf)
+
+
 class TestSubroutinize:
     @pytest.mark.parametrize(
         "testfile, table_tag",
@@ -74,12 +81,20 @@ class TestSubroutinize:
         assert font["post"].formatType == 2.0
         assert font["post"].glyphOrder == glyph_order
 
-        buf = io.BytesIO()
-        font.save(buf)
-        buf.seek(0)
-        font2 = ttLib.TTFont(buf)
+        font2 = recompile_font(font)
 
         assert font2.getGlyphOrder() == glyph_order
+
+        # now convert from CFF2 to CFF1 and check post format is set to 3.0
+        # https://github.com/adobe-type-tools/cffsubr/issues/8
+        cffsubr.subroutinize(font2, cff_version=1)
+
+        assert font2["post"].formatType == 3.0
+        assert font2["post"].glyphOrder == None
+
+        font3 = recompile_font(font2)
+
+        assert font3.getGlyphOrder() == glyph_order
 
     def test_drop_glyph_names(self):
         font = load_test_font("SourceSansPro-Regular.subset.ttx")

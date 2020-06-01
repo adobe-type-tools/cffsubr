@@ -170,7 +170,8 @@ def subroutinize(
     if not inplace:
         otf = copy.deepcopy(otf)
 
-    glyphOrder = otf.getGlyphOrder()
+    # ensure the glyph order is decompiled before CFF table is replaced
+    _ = otf.getGlyphOrder()
 
     buf = io.BytesIO()
     otf.save(buf)
@@ -190,14 +191,34 @@ def subroutinize(
         and keep_glyph_names
     ):
         # set 'post' to format 2 to keep the glyph names dropped from CFF2
-        post_table = otf.get("post")
-        if post_table and post_table.formatType != 2.0:
-            post_table.formatType = 2.0
-            post_table.extraNames = []
-            post_table.mapping = {}
-            post_table.glyphOrder = glyphOrder
+        set_post_table_format(otf, 2.0)
+    elif (
+        input_format == CFFTableTag.CFF2
+        and output_format == CFFTableTag.CFF
+    ):
+        # set 'post' to format 3 so CFF glyph names are not stored twice
+        # TODO convert to CID when keep_glyph_names=False?
+        set_post_table_format(otf, 3.0)
 
     return otf
+
+
+def set_post_table_format(otf, formatType):
+    if formatType not in (2.0, 3.0):
+        raise NotImplementedError(formatType)
+
+    post = otf.get("post")
+    if post and post.formatType != formatType:
+        post.formatType = formatType
+        if formatType == 2.0:
+            post.extraNames = []
+            post.mapping = {}
+            post.glyphOrder = otf.getGlyphOrder()
+        else:
+            for attr in ("extraNames", "mapping"):
+                if hasattr(post, attr):
+                    delattr(post, attr)
+            post.glyphOrder = None
 
 
 def has_subroutines(otf: ttLib.TTFont) -> bool:
