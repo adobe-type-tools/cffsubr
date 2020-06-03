@@ -47,7 +47,7 @@ class Error(Exception):
 
 
 TX_EXE = "tx"
-if sys.version == "win32":
+if sys.platform == "win32":
     TX_EXE += ".exe"
 
 
