@@ -46,6 +46,11 @@ class Error(Exception):
     pass
 
 
+TX_EXE = "tx"
+if sys.version == "win32":
+    TX_EXE += ".exe"
+
+
 def _run_embedded_tx(*args, **kwargs):
     """Run the embedded tx executable with the list of positional arguments.
 
@@ -55,7 +60,7 @@ def _run_embedded_tx(*args, **kwargs):
         subprocess.CompletedProcess object with the following attributes:
         args, returncode, stdout, stderr.
     """
-    with path(__name__, "tx") as tx_cli:
+    with path(__name__, TX_EXE) as tx_cli:
         return subprocess.run([str(tx_cli)] + list(args), **kwargs)
 
 
