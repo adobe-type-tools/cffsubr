@@ -187,6 +187,14 @@ def subroutinize(
     cff_table = ttLib.newTable(output_format)
     cff_table.decompile(compressed_cff_data, otf)
 
+    # When UPEM != 1000, tx leaves behind an invalid FontMatrix operator inside the
+    # CFF2 FontDict, which produces a spurious warning on compiling with fontTools.
+    # https://github.com/adobe-type-tools/cffsubr/issues/13
+    if output_format == CFFTableTag.CFF2:
+        for font_dict in cff_table.cff[0].FDArray:
+            if "FontMatrix" in font_dict.rawDict:
+                del font_dict.rawDict["FontMatrix"]
+
     del otf[input_format]
     otf[output_format] = cff_table
 
