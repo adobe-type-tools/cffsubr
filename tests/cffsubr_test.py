@@ -1,6 +1,8 @@
 import io
 import pathlib
+import logging
 from fontTools import ttLib
+from fontTools import cffLib
 import cffsubr
 import pytest
 
@@ -114,6 +116,22 @@ class TestSubroutinize:
         font2 = ttLib.TTFont(buf)
 
         assert font2.getGlyphOrder() != glyph_order
+
+    def test_non_standard_upem_mute_font_matrix_warning(self, caplog):
+        # See https://github.com/adobe-type-tools/cffsubr/issues/13
+        font = load_test_font("FontMatrixTest.ttx")
+
+        assert font["CFF "].cff[0].FontMatrix == [0.0005, 0, 0, 0.0005, 0, 0]
+
+        cffsubr.subroutinize(font, cff_version=2)
+
+        with caplog.at_level(logging.WARNING, logger=cffLib.log.name):
+            font2 = recompile_font(font)
+
+        assert (
+            "Some CFF FDArray/FontDict keys were ignored upon compile: FontMatrix"
+            not in caplog.text
+        )
 
 
 @pytest.mark.parametrize(
