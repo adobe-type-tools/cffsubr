@@ -135,6 +135,7 @@ setup(
     platforms=["posix", "nt"],
     package_dir={"": "src"},
     packages=find_packages("src"),
+    entry_points={"console_scripts": ["cffsubr = cffsubr.__main__:main"]},
     ext_modules=[tx],
     zip_safe=False,
     cmdclass=cmdclass,
