@@ -52,8 +52,8 @@ jobs:
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
         # Build x86 and Universal on Mac
         CIBW_ARCHS_MACOS: x86_64 universal2
-        # skip PyPy (no manylinux1), 32-bit linux, and other architectures
-        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
+        # skip PyPy (no manylinux1), 32-bit linux, musl linux, and other architectures
+        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x *-musllinux*"
         CIBW_TEST_REQUIRES: "pytest"
         # run test suite with pytest, no coverage
         # TODO: run with coverage and publish to codecov.io
