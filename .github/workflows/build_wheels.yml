@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-11]
 
     steps:
     - uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
 
     - name: Install cibuildwheel
       run: |
-        python -m pip install cibuildwheel==1.4.1
+        python -m pip install cibuildwheel==2.2.2
 
     - name: Build wheel
       run: |
@@ -47,9 +47,11 @@ jobs:
         CIBW_BEFORE_BUILD: "git submodule foreach git clean -fdx"
         # The embedded 'tx' C executable is independent of Python ABI so we only need to build it once.
         # Here we choose the minimum supported version, i.e. Python 3.6
-        CIBW_BUILD: "cp36-*"
+        CIBW_BUILD: "cp36-* cp38-macosx_universal2"
         # build using the manylinux1 image to ensure manylinux1 wheels are produced
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+        # Build x86 and Universal on Mac
+        CIBW_ARCHS_MACOS: x86_64 universal2
         # skip PyPy (no manylinux1), 32-bit linux, and other architectures
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x"
         CIBW_TEST_REQUIRES: "pytest"
