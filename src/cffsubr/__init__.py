@@ -8,10 +8,19 @@ from typing import BinaryIO, Optional, Union
 import sys
 
 try:
-    from importlib.resources import path
+    # Python >= 3.9
+    from importlib.resources import as_file, files
 except ImportError:
-    # use backport for python < 3.7
-    from importlib_resources import path
+    try:
+        # python >= 3.7, deprecated in python 3.11, removed in 3.13
+        from importlib.resources import path
+    except ImportError:
+        # use backport for python < 3.7
+        from importlib_resources import path
+else:
+    # https://docs.python.org/3.11/library/importlib.resources.html#importlib.resources.as_file
+    def path(package, resource):
+        return as_file(files(package).joinpath(resource))
 
 from fontTools import ttLib
 
