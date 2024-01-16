@@ -97,26 +97,18 @@ class ExecutableBuildExt(build_ext):
 
 cmdclass["build_ext"] = ExecutableBuildExt
 
-c_programs_dir = os.path.join("external", "afdko", "c")
-if platform.system() == "Linux":
-    plat = "linux"
-    compiler = "gcc"
-elif platform.system() == "Darwin":
-    plat = "osx"
-    compiler = "xcode"
-elif platform.system() == "Windows":
-    plat = "win"
-    compiler = "visualstudio"
-else:
-    raise NotImplementedError(platform.system())
+afdko_root_dir = os.path.join("external", "afdko")
+afdko_output_dir = os.path.join(afdko_root_dir, "build", "bin")
+if platform.system() == "Windows":
+    afdko_output_dir = os.path.join(afdko_output_dir, "Debug")
 
-build_release_cmd = ("build.cmd" if plat == "win" else "sh build.sh") + " release"
+build_release_cmd = "cmake -S . -B build && cmake --build build"
 
 tx = Executable(
     "cffsubr.tx",
     build_cmd=build_release_cmd,
-    cwd=os.path.join(c_programs_dir, "tx", "build", plat, compiler),
-    output_dir=os.path.join(c_programs_dir, "build_all"),
+    cwd=afdko_root_dir,
+    output_dir=afdko_output_dir,
 )
 
 with open("README.md", "r", encoding="utf-8") as readme:
