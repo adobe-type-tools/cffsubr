@@ -43,7 +43,7 @@ def main(args=None):
         "-d",
         "--desubroutinize",
         action="store_true",
-        help="Don't subroutinize, instead remove all subroutines (in any).",
+        help="Don't subroutinize, instead remove all subroutines (if any).",
     )
     options = parser.parse_args(args)
 
