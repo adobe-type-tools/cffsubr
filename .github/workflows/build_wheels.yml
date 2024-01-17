@@ -66,6 +66,8 @@ jobs:
         CIBW_ARCHS_MACOS: x86_64 universal2
         # skip PyPy (no manylinux2014), 32-bit linux, musl linux, and other architectures
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x *-musllinux*"
+        # Force static link of libxml2
+        CIBW_ENVIRONMENT: "FORCE_BUILD_LIBXML2=ON"
         CIBW_TEST_REQUIRES: "pytest"
         # run test suite with pytest, no coverage
         # TODO: run with coverage and publish to codecov.io
