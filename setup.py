@@ -7,6 +7,7 @@ from distutils.dir_util import mkpath
 from distutils import log
 import os
 import subprocess
+import sys
 
 
 cmdclass = {}
@@ -99,10 +100,7 @@ cmdclass["build_ext"] = ExecutableBuildExt
 
 afdko_root_dir = os.path.join("external", "afdko")
 afdko_output_dir = os.path.join(afdko_root_dir, "build", "bin")
-if platform.system() == "Windows":
-    afdko_output_dir = os.path.join(afdko_output_dir, "Debug")
-
-build_release_cmd = "cmake -GNinja -S . -B build && cmake --build build"
+build_release_cmd = f"{sys.executable} setup.py build --build-scripts build/bin"
 
 tx = Executable(
     "cffsubr.tx",
