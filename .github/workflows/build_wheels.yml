@@ -22,7 +22,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-11]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
         submodules: true
@@ -35,14 +35,14 @@ jobs:
       run: echo "C:\Program Files\Git\mingw64\libexec\git-core" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       if: matrix.os == 'windows-latest'
 
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v5
       name: Install Python
       with:
         python-version: '3.7'
 
     - name: Install cibuildwheel
       run: |
-        python -m pip install cibuildwheel==2.2.2
+        python -m pip install cibuildwheel
 
     - name: Build wheel
       run: |
@@ -58,8 +58,8 @@ jobs:
         # make sure afdko submodule is not "dirty" before starting a new build
         CIBW_BEFORE_BUILD: "git submodule foreach git clean -fdx"
         # The embedded 'tx' C executable is independent of Python ABI so we only need to build it once.
-        # Here we choose the minimum supported version, i.e. Python 3.6
-        CIBW_BUILD: "cp36-* cp38-macosx_universal2"
+        # Here we choose the minimum supported version, i.e. Python 3.7
+        CIBW_BUILD: "cp37-* cp38-macosx_universal2"
         # build using the manylinux2014 image to ensure manylinux2014 wheels are produced
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         # Build x86 and Universal on Mac
@@ -71,7 +71,7 @@ jobs:
         # TODO: run with coverage and publish to codecov.io
         CIBW_TEST_COMMAND: "pytest {project}/tests"
 
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: cffsubr-dist
         path: ./dist

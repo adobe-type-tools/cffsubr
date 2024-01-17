@@ -102,7 +102,7 @@ afdko_output_dir = os.path.join(afdko_root_dir, "build", "bin")
 if platform.system() == "Windows":
     afdko_output_dir = os.path.join(afdko_output_dir, "Debug")
 
-build_release_cmd = "cmake -S . -B build && cmake --build build"
+build_release_cmd = "cmake -GNinja -S . -B build && cmake --build build"
 
 tx = Executable(
     "cffsubr.tx",
@@ -141,7 +141,7 @@ setup(
         "setuptools-git-ls-files",
     ],
     extras_require={"testing": ["pytest"]},
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
