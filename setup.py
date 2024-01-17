@@ -135,11 +135,6 @@ setup(
         "importlib_resources; python_version < '3.7'",
         "fontTools >= 4.10.2",
     ],
-    setup_requires=[
-        "setuptools_scm",
-        # finds all git tracked files including submodules when making sdist MANIFEST
-        "setuptools-git-ls-files",
-    ],
     extras_require={"testing": ["pytest"]},
     python_requires=">=3.7",
     classifiers=[
