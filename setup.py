@@ -132,7 +132,6 @@ setup(
     zip_safe=False,
     cmdclass=cmdclass,
     install_requires=[
-        "importlib_resources; python_version < '3.7'",
         "fontTools >= 4.10.2",
     ],
     extras_require={"testing": ["pytest"]},
