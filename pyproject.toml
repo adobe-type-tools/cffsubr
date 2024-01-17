@@ -2,6 +2,7 @@
 requires = [
     "cmake",
     "ninja",
+    "scikit-build",
     "setuptools",
     "setuptools_scm",
 ]
