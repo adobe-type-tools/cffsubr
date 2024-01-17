@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0  # unshallow fetch for setuptools-scm
-        submodules: true
+        submodules: recursive
 
     - uses: actions/setup-python@v5
       name: Install Python
