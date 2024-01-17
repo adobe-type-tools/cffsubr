@@ -58,8 +58,9 @@ jobs:
         CIBW_BUILD: "cp37-* cp38-macosx_universal2"
         # build using the manylinux2014 image to ensure manylinux2014 wheels are produced
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-        # Build x86 and Universal on Mac
-        CIBW_ARCHS_MACOS: x86_64 universal2
+        # Only build Universal2 on Mac
+        CIBW_ARCHS_MACOS: universal2
+        CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64 -I/usr/include/libxml2' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
         # skip PyPy (no manylinux2014), 32-bit linux, musl linux, and other architectures
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x *-musllinux*"
         # Force static link of libxml2
