@@ -17,6 +17,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-11]
 
@@ -28,6 +29,10 @@ jobs:
 
     - name: Use MSBuild (Windows)
       uses: microsoft/setup-msbuild@v1.0.2
+      if: matrix.os == 'windows-latest'
+
+    - name: Append Git to the path
+      run: echo "C:\Program Files\Git\mingw64\libexec\git-core" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       if: matrix.os == 'windows-latest'
 
     - uses: actions/setup-python@v1
@@ -43,16 +48,23 @@ jobs:
       run: |
         python -m cibuildwheel --output-dir dist
       env:
+        # avoid timeout when cloning
+        CIBW_BEFORE_ALL: |
+          git config --global url.https://github.com/.insteadOf git://github.com/
+        # prepare build dependencies
+        CIBW_BEFORE_ALL_LINUX: |
+          git config --global url.https://github.com/.insteadOf git://github.com/
+          yum install -y libuuid-devel
         # make sure afdko submodule is not "dirty" before starting a new build
         CIBW_BEFORE_BUILD: "git submodule foreach git clean -fdx"
         # The embedded 'tx' C executable is independent of Python ABI so we only need to build it once.
         # Here we choose the minimum supported version, i.e. Python 3.6
         CIBW_BUILD: "cp36-* cp38-macosx_universal2"
-        # build using the manylinux1 image to ensure manylinux1 wheels are produced
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
+        # build using the manylinux2014 image to ensure manylinux2014 wheels are produced
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
         # Build x86 and Universal on Mac
         CIBW_ARCHS_MACOS: x86_64 universal2
-        # skip PyPy (no manylinux1), 32-bit linux, musl linux, and other architectures
+        # skip PyPy (no manylinux2014), 32-bit linux, musl linux, and other architectures
         CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x *-musllinux*"
         CIBW_TEST_REQUIRES: "pytest"
         # run test suite with pytest, no coverage
