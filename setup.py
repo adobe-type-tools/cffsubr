@@ -1,5 +1,3 @@
-from __future__ import print_function, absolute_import
-import platform
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.file_util import copy_file
@@ -25,7 +23,6 @@ else:
 
 
 class Executable(Extension):
-
     if os.name == "nt":
         suffix = ".exe"
     else:
@@ -41,34 +38,11 @@ class Executable(Extension):
 
 
 class ExecutableBuildExt(build_ext):
-    def finalize_options(self):
-        from distutils.ccompiler import get_default_compiler
-
-        build_ext.finalize_options(self)
-
-        if self.compiler is None:
-            self.compiler = get_default_compiler(os.name)
-        self._compiler_env = dict(os.environ)
-
     def get_ext_filename(self, ext_name):
         for ext in self.extensions:
             if isinstance(ext, Executable):
                 return os.path.join(*ext_name.split(".")) + ext.suffix
         return build_ext.get_ext_filename(self, ext_name)
-
-    def run(self):
-        if self.compiler == "msvc":
-            self.call_vcvarsall_bat()
-
-        build_ext.run(self)
-
-    def call_vcvarsall_bat(self):
-        import struct
-        from setuptools.msvc import msvc14_get_vc_env
-
-        arch = "x64" if struct.calcsize("P") * 8 == 64 else "x86"
-        vc_env = msvc14_get_vc_env(arch)
-        self._compiler_env.update(vc_env)
 
     def build_extension(self, ext):
         if not isinstance(ext, Executable):
@@ -79,7 +53,7 @@ class ExecutableBuildExt(build_ext):
         cmd = ext.build_cmd
         log.debug("running '{}'".format(cmd))
         if not self.dry_run:
-            env = self._compiler_env.copy()
+            env = dict(os.environ)
             if ext.env:
                 env.update(ext.env)
             p = subprocess.run(cmd, cwd=ext.cwd, env=env, shell=True)
