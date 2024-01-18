@@ -107,6 +107,10 @@ tx = Executable(
     build_cmd=build_release_cmd,
     cwd=afdko_root_dir,
     output_dir=afdko_output_dir,
+    # we don't care about the precise afdko version, but we need *some* version
+    # otherwise building a wheel from a cffsubr sdist tarball fails because the
+    # afdko submodule in the unzipped sdist isn't recognized as a git repo
+    env={"SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AFDKO": "0.0.0"},
 )
 
 with open("README.md", "r", encoding="utf-8") as readme:
