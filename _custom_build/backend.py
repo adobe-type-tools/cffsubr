@@ -12,3 +12,12 @@ def get_requires_for_build_sdist(config_settings=None):
         # Finds all git tracked files including submodules, when making sdist MANIFEST
         "setuptools-git-ls-files"
     ]
+
+def get_requires_for_build_wheel(config_settings=None):
+    return _orig.get_requires_for_build_wheel(config_settings) + [
+        # required for building the 'tx' executable from afdko package
+        "cmake",
+        "ninja",
+        "scikit-build",
+    ]
+
