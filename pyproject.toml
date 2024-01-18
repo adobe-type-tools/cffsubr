@@ -1,9 +1,10 @@
 [build-system]
 requires = [
-    "cmake",
     "setuptools",
-    "wheel",
     "setuptools_scm",
-    "setuptools-git-ls-files",
 ]
-build-backend = "setuptools.build_meta"
+# https://setuptools.pypa.io/en/latest/build_meta.html#dynamic-build-dependencies-and-other-build-meta-tweaks
+build-backend = "backend"
+backend-path = ["_custom_build"]
+[tool.setuptools_scm]
+write_to = "src/cffsubr/_version.py"
