@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
     - uses: actions/setup-python@v5
       name: Install Python
       with:
-        python-version: '3.7'
+        python-version: '3.10'
 
     - name: Install cibuildwheel
       run: |
@@ -50,19 +50,20 @@ jobs:
         # prepare build dependencies
         CIBW_BEFORE_ALL_LINUX: |
           git config --global url.https://github.com/.insteadOf git://github.com/
-          yum install -y libuuid-devel
+          dnf install -y libuuid-devel
         # make sure afdko submodule is not "dirty" before starting a new build
         CIBW_BEFORE_BUILD: "git submodule foreach git clean -fdx"
-        # The embedded 'tx' C executable is independent of Python ABI so we only need to build it once.
-        # Here we choose the minimum supported version, i.e. Python 3.7
-        CIBW_BUILD: "cp37-* cp38-macosx_universal2"
-        # build using the manylinux2014 image to ensure manylinux2014 wheels are produced
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+        # The embedded 'tx' C executable is independent of Python ABI, but we build
+        # and test for all supported Python versions (3.10+).
+        CIBW_BUILD: "cp310-* cp311-* cp312-* cp313-* cp314-*"
+        # build using the manylinux_2_28 image
+        CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
         # Only build Universal2 on Mac
         CIBW_ARCHS_MACOS: universal2
         CIBW_ENVIRONMENT_MACOS: "CFLAGS='-arch arm64 -arch x86_64' CXXFLAGS='-arch arm64 -arch x86_64' LDFLAGS='-arch arm64 -arch x86_64'"
-        # skip PyPy (no manylinux2014), 32-bit linux, musl linux, and other architectures
-        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_aarch64 cp*manylinux_ppc64le cp*manylinux_s390x *-musllinux*"
+        # skip PyPy, 32-bit linux, musl linux, and unsupported architectures
+        CIBW_SKIP: "pp* cp*manylinux_i686 cp*manylinux_ppc64le cp*manylinux_s390x *-musllinux*"
         # Force static link of libxml2
         CIBW_ENVIRONMENT: "FORCE_BUILD_LIBXML2=ON"
         CIBW_TEST_REQUIRES: "pytest"
@@ -70,14 +71,37 @@ jobs:
         # TODO: run with coverage and publish to codecov.io
         CIBW_TEST_COMMAND: "pytest {project}/tests"
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: cffsubr-dist
+        name: cffsubr-dist-${{ matrix.os }}
         path: ./dist
+
+  publish:
+    name: Publish to PyPI
+    needs: build_wheels
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # unshallow fetch for setuptools-scm
+        submodules: recursive
+
+    - uses: actions/setup-python@v5
+      name: Install Python
+      with:
+        python-version: '3.10'
 
     - name: Build sdist
       run: pipx run build --sdist
-      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: cffsubr-dist-*
+        merge-multiple: true
+        path: ./dist
 
     - name: Publish package to PyPI
       run: |
@@ -86,4 +110,3 @@ jobs:
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.pypi_password }}
-      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
