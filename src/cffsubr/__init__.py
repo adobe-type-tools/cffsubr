@@ -92,7 +92,14 @@ def _tx_subroutinize(data: bytes, output_format: str = CFFTableTag.CFF) -> bytes
     with tempfile.NamedTemporaryFile(prefix="tx-", delete=False) as input_tmp:
         input_tmp.write(data)
 
-    args = [f"-{output_format.rstrip().lower()}", "+S", "+b"]
+    args = [
+        f"-{output_format.rstrip().lower()}",
+        "+S",  # subroutinize
+        "+b",  # preserve glyph order
+        "-E",  # don't optimize for embedding
+        "-F",  # don't optimize Family zones
+        "-O",  # don't optimize for ROM
+    ]
     kwargs = dict(check=True, stderr=subprocess.PIPE)
 
     if sys.platform == "win32":
