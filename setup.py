@@ -67,7 +67,7 @@ class ExecutableBuildExt(build_ext):
         dest_path = self.get_ext_fullpath(ext.name)
         mkpath(os.path.dirname(dest_path), verbose=self.verbose, dry_run=self.dry_run)
 
-        copy_file(exe_fullpath, dest_path, verbose=self.verbose, dry_run=self.dry_run)
+        copy_file(exe_fullpath, dest_path, verbose=self.verbose)
 
 
 cmdclass["build_ext"] = ExecutableBuildExt
