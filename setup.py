@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext
-from distutils.file_util import copy_file
-from distutils.dir_util import mkpath
 from distutils import log
 import os
 import subprocess
@@ -65,9 +63,8 @@ class ExecutableBuildExt(build_ext):
                 )
 
         dest_path = self.get_ext_fullpath(ext.name)
-        mkpath(os.path.dirname(dest_path), verbose=self.verbose, dry_run=self.dry_run)
-
-        copy_file(exe_fullpath, dest_path, verbose=self.verbose, dry_run=self.dry_run)
+        self.mkpath(os.path.dirname(dest_path))
+        self.copy_file(exe_fullpath, dest_path)
 
 
 cmdclass["build_ext"] = ExecutableBuildExt
@@ -84,7 +81,10 @@ tx = Executable(
     # we don't care about the precise afdko version, but we need *some* version
     # otherwise building a wheel from a cffsubr sdist tarball fails because the
     # afdko submodule in the unzipped sdist isn't recognized as a git repo
-    env={"SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AFDKO": "0.0.0"},
+    env={
+        "SETUPTOOLS_SCM_PRETEND_VERSION_FOR_AFDKO": "0.0.0",
+        "SETUPTOOLS_SCM_PRETEND_VERSION": "0.0.0",
+    },
 )
 
 with open("README.md", "r", encoding="utf-8") as readme:
